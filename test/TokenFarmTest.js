@@ -33,7 +33,6 @@ contract("TokenFarm", ([owner, investor]) => {
 
     // Transfer 100 Mock Dai to investor
     await daiToken.transfer(investor, tokens("100"), { from: owner });
-
   });
   
 
@@ -62,5 +61,37 @@ contract("TokenFarm", ([owner, investor]) => {
       assert.equal(balance.toString(), tokens("1000000"));
     });
   });
+
+  // Tests for mDAI staking
+  describe("Farming Tokens", async() => {
+    it("rewards investors for staking mDai tokens", async() => {
+      // Check stating balance
+      const startBalance = await daiToken.balanceOf(investor);
+      assert.equal(startBalance.toString(), tokens("100"), "Investor start balance is 100 mDAI");
+
+      // Approve TokenFarm contract to transfer tokens for investor
+      await daiToken.approve(tokenFarm.address, tokens("100"), { from: investor });
+
+      // Stake tokens from investor
+      await tokenFarm.stakeTokens(tokens("100"), { from: investor });
+
+      // Check staking mDAI results
+      const endBalance = await daiToken.balanceOf(investor);
+      assert.equal(endBalance.toString(), tokens("0"), "Investor end balance is 0 mDAI");
+      
+      const tokenFarmBal = await daiToken.balanceOf(tokenFarm.address);
+      assert.equal(tokenFarmBal.toString(), tokens("100"), "TokenFarm end balance is 100 mDAI");
+
+      // Check TokenFarm mapping results
+      const stakingBalInv = await tokenFarm.stakingBalance(investor);
+      assert.equal(stakingBalInv.toString(), tokens("100"), "Investor Staking balance is 100 mDAI");
+
+      const isStakingInv = await tokenFarm.isStaking(investor);
+      assert.equal(isStakingInv, true, "Investor staking status is correct");
+
+    });
+
+  });
+
 
 });
