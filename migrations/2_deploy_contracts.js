@@ -1,5 +1,6 @@
-const DappToken = artifacts.require("DappToken");
+/* global artifacts contract */
 const DaiToken = artifacts.require("DaiToken");
+const DappToken = artifacts.require("DappToken");
 const TokenFarm = artifacts.require("TokenFarm");
 
 module.exports = async function(deployer, network, accounts) {
