@@ -1,3 +1,5 @@
+const { assert } = require("chai");
+
 /* global artifacts web3 contract before assert */
 const DaiToken = artifacts.require("DaiToken");
 const DappToken = artifacts.require("DappToken");
@@ -88,6 +90,16 @@ contract("TokenFarm", ([owner, investor]) => {
 
       const isStakingInv = await tokenFarm.isStaking(investor);
       assert.equal(isStakingInv, true, "Investor staking status is correct");
+
+      // Issue Reward tokens to investor
+      await tokenFarm.issueTokens({ from: owner });
+
+      // Check balances after reward issuance
+      const rewardBalInv = await dappToken.balanceOf(investor);
+      assert.equal(rewardBalInv.toString(), tokens("100"), "Investor Reward balance is 100 DApp");
+
+      // Ensure only owner can issue reward tokens
+      await tokenFarm.issueTokens({ from: investor }).should.be.rejected;
 
     });
 

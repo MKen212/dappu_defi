@@ -7,6 +7,7 @@ import "./DaiToken.sol";
 // Main Yield Farming Smart Contract
 contract TokenFarm {
   string public name = "DApp Token Farm";
+  address public owner;
   DappToken public dappToken;
   DaiToken public daiToken;
 
@@ -19,10 +20,14 @@ contract TokenFarm {
     // Store depolyed contract for each of the ERC-20 tokens
     dappToken = _dappToken;
     daiToken = _daiToken;
+    owner = msg.sender;
   }
 
   // Stake mDAI Tokens (Deposit)
   function stakeTokens(uint _amount) public {
+    // Require amount being staked is greater than zero
+    require(_amount > 0, "Amount staked cannot be zero");
+
     // Transfer mDAI to this contract
     daiToken.transferFrom(msg.sender, address(this), _amount);
     
@@ -39,14 +44,24 @@ contract TokenFarm {
     isStaking[msg.sender] = true;
   }
 
-  
+
 
   // Unstaking mDAI Tokens (Withdraw)
 
 
   // Issuing DApp Tokens (Interest rewards)
+  function issueTokens() public {
+    // Ensure this is only called by the TokenFarm contract owner
+    require(msg.sender == owner, "Caller must be the Owner");
 
-
-
+    // Loop over stakers array and transfer DApp Tokens
+    for (uint i = 0; i < stakers.length; i++) {
+      address recipient = stakers[i];
+      uint recBalance = stakingBalance[recipient];
+      if (recBalance > 0 ) {
+        dappToken.transfer(recipient, recBalance);
+      }
+    }
+  }
 
 }
