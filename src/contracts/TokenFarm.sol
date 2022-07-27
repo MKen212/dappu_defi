@@ -45,8 +45,23 @@ contract TokenFarm {
   }
 
 
-
   // Unstaking mDAI Tokens (Withdraw)
+  function unstakeTokens() public {
+    // Fetch the mDAI amount staked
+    uint stakedBalance = stakingBalance[msg.sender];
+
+    // Ensure the amount staked is greater than zero
+    require(stakedBalance > 0, "Staked balance cannot be zero");
+
+    // Transfer mDAI back to the recipient
+    daiToken.transfer(msg.sender, stakedBalance);
+
+    // Update the staking balance for the sender
+    stakingBalance[msg.sender] = 0;
+
+    // Update staking status
+    isStaking[msg.sender] = false;
+  }
 
 
   // Issuing DApp Tokens (Interest rewards)

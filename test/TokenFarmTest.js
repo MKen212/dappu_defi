@@ -66,7 +66,7 @@ contract("TokenFarm", ([owner, investor]) => {
 
   // Tests for mDAI staking
   describe("Farming Tokens", async() => {
-    it("rewards investors for staking mDai tokens", async() => {
+    it("rewards investors for staking mDAI tokens", async() => {
       // Check stating balance
       const startBalance = await daiToken.balanceOf(investor);
       assert.equal(startBalance.toString(), tokens("100"), "Investor start balance is 100 mDAI");
@@ -103,7 +103,25 @@ contract("TokenFarm", ([owner, investor]) => {
 
     });
 
-  });
+    it("allows un-staking of mDAI tokens", async() => {
+      // Un-stake tokens for investor
+      await tokenFarm.unstakeTokens({ from: investor });
 
+      // Check un-staking mDAI results
+      const endBalance = await daiToken.balanceOf(investor);
+      assert.equal(endBalance.toString(), tokens("100"), "Investor end balance is 100 mDAI");
+      
+      const tokenFarmBal = await daiToken.balanceOf(tokenFarm.address);
+      assert.equal(tokenFarmBal.toString(), tokens("0"), "TokenFarm end balance is 0 mDAI");
+
+      // Check TokenFarm mapping results
+      const stakingBalInv = await tokenFarm.stakingBalance(investor);
+      assert.equal(stakingBalInv.toString(), tokens("0"), "Investor Staking balance is 0 mDAI");
+
+      const isStakingInv = await tokenFarm.isStaking(investor);
+      assert.equal(isStakingInv, false, "Investor staking status is correct");
+    });
+
+  });
 
 });
