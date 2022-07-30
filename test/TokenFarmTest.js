@@ -1,5 +1,3 @@
-const { assert } = require("chai");
-
 /* global artifacts web3 contract before assert */
 const DaiToken = artifacts.require("DaiToken");
 const DappToken = artifacts.require("DappToken");
