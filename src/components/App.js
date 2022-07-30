@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import Navbar from './Navbar';
+import Main from './Main';
 import './App.css';
 import Web3 from 'web3';
 import DaiToken from '../abis/DaiToken.json';
@@ -22,13 +23,40 @@ class App extends Component {
     }
   }
 
+  // Stake Tokens Function
+  stakeTokens = (amount) => {
+    this.setState({ loading: true });
+    this.state.daiToken.methods
+      // Approve Staking Amount
+      .approve(this.state.tokenFarm._address, amount)
+      .send({ from: this.state.account })
+      .on("transactionHash", (hash) => {
+        this.state.tokenFarm.methods
+          // Stake Tokens
+          .stakeTokens(amount)
+          .send({ from: this.state.account })
+          .on("transactionHash", (hash) => {
+            this.setState({ loading: false });
+          });
+      });
+  }
+
+  // Unstake Tokens Function
+  unstakeTokens = () => {
+    this.setState({ loading: true });
+    this.state.tokenFarm.methods
+      // Unstake Tokens
+      .unstakeTokens()
+      .send({ from: this.state.account })
+      .on("transactionHash", (hash) => {
+        this.setState({ loading: false });
+      });
+  }
 
   // Initialise the connection to the blockchain
   async componentWillMount() {
-    console.log(this.state.loading);
     await this.loadWeb3();
     await this.loadBlockchainData();
-    console.log(this.state.loading);
   }
 
   // Load the web3.js library
@@ -99,6 +127,20 @@ class App extends Component {
   }
 
   render() {
+    // Only render if the app his finished loading from the Blockchain
+    let content;
+    if(this.state.loading) {
+      content = <p id="loader" className="text-centre">Loading...</p>
+    } else {
+      content = <Main
+        daiTokenBalance = {this.state.daiTokenBalance}
+        dappTokenBalance = {this.state.dappTokenBalance}
+        stakingBalance = {this.state.stakingBalance}
+        stakeTokens = {this.stakeTokens}
+        unstakeTokens = {this.unstakeTokens}
+       />
+    }
+
     return (
       <div>
         <Navbar account={this.state.account} />
@@ -113,7 +155,7 @@ class App extends Component {
                 >
                 </a>
 
-                <h1>Hello, World!</h1>
+                {content}
 
               </div>
             </main>
